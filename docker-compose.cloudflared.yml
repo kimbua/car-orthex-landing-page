@@ -1,0 +1,30 @@
+# Accountless TryCloudflare Quick Tunnel — exposes the BMW Digital Showroom
+# frontend (http://frontend:3000) via a temporary public https URL.
+# DB and backend are NOT exposed. Join the project's single external network.
+services:
+  cloudflared:
+    image: "cloudflare/cloudflared:2026.8.2"
+    container_name: bmw-showroom-cloudflared
+    command:
+      - tunnel
+      - --no-autoupdate
+      - --protocol
+      - http2
+      - --url
+      - "http://frontend:3000"
+    restart: unless-stopped
+    networks:
+      - test_banhang_network
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,nodev
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: local
+
+networks:
+  test_banhang_network:
+    external: true

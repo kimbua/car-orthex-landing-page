@@ -1,0 +1,66 @@
+name: bmw-showroom
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: bmw-showroom-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bmw}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bmw_showroom_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-bmw_showroom}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - bmw_showroom_pgdata:/var/lib/postgresql/data
+    networks:
+      - test_banhang_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bmw} -d ${POSTGRES_DB:-bmw_showroom}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build: ./backend
+    container_name: bmw-showroom-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-bmw}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-bmw_showroom_dev}
+      DB_NAME: ${POSTGRES_DB:-bmw_showroom}
+      CORS_ORIGIN: http://127.0.0.1:3000
+      SEED_ON_STARTUP: "true"
+    ports:
+      - "127.0.0.1:3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - test_banhang_network
+
+  frontend:
+    build: ./frontend
+    container_name: bmw-showroom-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      API_URL: http://backend:3001
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - test_banhang_network
+
+volumes:
+  bmw_showroom_pgdata:
+
+networks:
+  test_banhang_network:
+    external: true

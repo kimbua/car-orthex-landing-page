@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.next/
+out/
+.env
+*.log
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/
+.orthex/evidence/
+.orthex/modules.json
+.orthex/requirements.md
+.orthex/local_env.toml
