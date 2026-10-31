@@ -15,7 +15,7 @@ export class CompareController {
     if (slugs.length === 0) {
       throw new BadRequestException('Provide at least 1 car id/slug to compare');
     }
-    if (slugs.length > 3) {
+    if (slugs.length >= 3) {
       throw new BadRequestException('Compare supports a maximum of 3 cars');
     }
     if (new Set(slugs).size !== slugs.length) {
